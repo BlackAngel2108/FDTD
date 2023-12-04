@@ -1,5 +1,8 @@
 ﻿#include "FDTD.h"
-
+#include <string>
+#include "For_tests.h"
+#define Ey_
+#define Bz_
 //void Start_test(Field& Test) {
 //    double dx = 1;
 //    double dy = 1;
@@ -13,132 +16,41 @@
 //    std::cout << "dx = " << dx << " dy = " << dy << std::endl;
 //    std::cout << "dt = " << dt << " N_t = " << N_t << std::endl;
 //}
-void get_Net2(Field& fld, std::ofstream& fout) {
-    for (int j = fld.get_N_y() - 1; j >= 0; j--) {
-        for (int i = 0; i < fld.get_N_x(); i++) {
-            fout << fld.Net_index(i, j).Ex;
-            if (i == fld.get_N_x() - 1)
-            {
-                fout << std::endl;
-            }
-            else
-            {
-                fout << ";";
-            }
-        }
-    }
-    fout << std::endl << std::endl;
-    for (int j = fld.get_N_y() - 1; j >= 0; j--) {
-        for (int i = 0; i < fld.get_N_x(); i++) {
-            fout << fld.Net_index(i, j).Ey;
-            if (i == fld.get_N_x() - 1)
-            {
-                fout << std::endl;
-            }
-            else
-            {
-                fout << ";";
-            }
-        }
-    }
-    fout << std::endl << std::endl;
-    for (int j = fld.get_N_y() - 1; j >= 0; j--) {
-        for (int i = 0; i < fld.get_N_x(); i++) {
-            fout << fld.Net_index(i, j).Ez;
-            if (i == fld.get_N_x() - 1)
-            {
-                fout << std::endl;
-            }
-            else
-            {
-                fout << ";";
-            }
-        }
-    }
-    fout << std::endl << std::endl;
-    for (int j = fld.get_N_y() - 1; j >= 0; j--) {
-        for (int i = 0; i < fld.get_N_x(); i++) {
-            fout << fld.Net_index(i, j).Bx;
-            if (i == fld.get_N_x() - 1)
-            {
-                fout << std::endl;
-            }
-            else
-            {
-                fout << ";";
-            }
-        }
-    }
-    fout << std::endl << std::endl;
-    for (int j = fld.get_N_y() - 1; j >= 0; j--) {
-        for (int i = 0; i < fld.get_N_x(); i++) {
-            fout << fld.Net_index(i, j).By;
-            if (i == fld.get_N_x() - 1)
-            {
-                fout << std::endl;
-            }
-            else
-            {
-                fout << ";";
-            }
-        }
-    }
-    fout << std::endl << std::endl;
-    for (int j = fld.get_N_y() - 1; j >= 0; j--) {
-        for (int i = 0; i < fld.get_N_x(); i++) {
-            fout << fld.Net_index(i, j).Bz;
-            if (i == fld.get_N_x() - 1)
-            {
-                fout << std::endl;
-            }
-            else
-            {
-                fout << ";";
-            }
-        }
-    }
-    fout << std::endl << std::endl;
-}
-void get_test_Net(Field& fld) {
-    std::ofstream test_fout;
-    test_fout.open("../../PlotScript/OutFile.csv");
-    //test_fout.open("OutFile.csv");
-    get_Net2(fld,test_fout);
-    test_fout.close();
-}
-node f(double x, double b) {
-    node temp;
-    temp.Ey = sin(2 * PI * (x) / b);
-    temp.Bz = temp.Ey;
-    temp.Bx = 0;
-    temp.By = 0;
-    temp.Ex = 0;
-    temp.Ez = 0;
-    return temp;
-}// Функция вспомогательная, для задачи поля
+
+
 int main() {
-    double dx = 1;
-    double dy = 1;
-    int N_x = 10;
-    int N_y = 10;
-    double X_max = dx * N_x;
-    double Y_max = dy * N_y;
-    int N_t = 10;
-    double dt = 1.0 / c / 10.0 * dx;
-    Field Test(dx, dy, N_x, N_y, N_t);
-    //Start();
-    //Field Main;
-    //Main.Start_test();
-    Test.set_net(f, Test.get_X_max());
+    int N=100;// количество итераций
+    Field Test(0.0, 1.0, 0.0, 1.0, 32, 1, 1e-11);
+    //Test(ax,bx,ay,by,N_x,N_y,
+    //Field Test(dx, dy, N_x, N_y, N_t);
+    Test.set_net(f1, Test.get_ax(), Test.get_bx());
     Test.print_Net();
     std::cout << std::endl;
-    //Tets.get_Net();
-    get_test_Net(Test);
-    Test.FDTD(Test.get_N_t());
-    get_test_Net(Test);
-    Test.print_Net();
+    std::string str0="../../PlotScript/OutFile0.csv";
+    get_test_Net(Test,str0,0);
+    //Test.FDTD(Test.get_N_t());
+    Test.FDTD(N);
+    std::string str100 = "../../PlotScript/OutFileT.csv";
+    get_test_Net(Test, str100,Test.get_dt()*N );
+    std::cout<< Test.get_dt() * N<<"\n";
+    //Test.print_Net();
+
+    Field Test_shifted(0.0, 1.0, 0.0, 1.0, 32, 1, 1e-11);
+
+    Test_shifted.set_net_shifted(f_shifted, Test_shifted.get_ax(), Test_shifted.get_bx());
+    Test_shifted.print_Net();
     std::cout << std::endl;
-    /* set_net(f);
-     FDTD(15);
-     print_Net();*/
+    std::string str1 = "../../PlotScript/OutFile0_shifted.csv";
+    get_test_Net(Test_shifted, str1,0);
+    Test_shifted.FDTD_shifted(N);
+    std::string str10 = "../../PlotScript/OutFileT_shifted.csv";
+    get_test_Net(Test_shifted, str10, Test_shifted.get_dt() * N);
+    std::cout << Test_shifted.get_dt() * N<<"\n";
+    Test_shifted.print_Net();
+
+    std::cout << std::endl;
+    std::cout << epsilon(Test, Test.get_dt() * N, Test.get_ax(), Test.get_bx());
+    std::cout << std::endl;
+    std::cout << epsilon(Test_shifted, Test_shifted.get_dt() * N, Test_shifted.get_ax(), Test_shifted.get_bx());
+     return 0;
 }
